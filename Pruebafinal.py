@@ -1,22 +1,49 @@
+from pickle import TRUE
 import cv2
 import numpy as np
 import serial
 from time import sleep
+from threading import Timer
 import imutils
 import time
+
+
+def counter():
+    start = time.perf_counter()
+    return start
+
+#TIMER = int(5)
+#def temps():
+ #   while True:
+  #      prev = time.time()
+    
+   #     while TIMER >= 0:
+        # current time
+    #        cur = time.time()
+     #       if cur-prev >= 1:
+      #          prev = cur
+       #         TIMER = TIMER-1
+#print("holaaa")
+
 def camera():
     COM = 'COM4'
     BAUD = 9600
+    detecto = False
     ser = serial.Serial(COM, BAUD)
  
     cap = cv2.VideoCapture(0)
     fps_start_time=0
     fps=0
-
+   
     azulBajo = np.array([90, 100, 20], np.uint8)
     azulAlto = np.array([120, 255, 255], np.uint8)
+    #start = time.perf_counter()
+    elapsed = 0
+    #detectando= False
     while True:
         ret, frame = cap.read()
+       # if detectando == False:
+           # print("no detectado")
         if ret:
             #fps_end_time= time.time()
             #time_diff=fps_end_time - fps_start_time
@@ -24,7 +51,6 @@ def camera():
             #fps_start_time = fps_end_time
 
             #fps_text = "FPS: {:.2f}".format(fps)
-
             #cv2.putText(frame,fps_text,(5,30), cv2.FONT_HERSHEY_COMPLEX,1, (0,255,255),1)
         
             frame = cv2.flip(frame, 1)
@@ -32,9 +58,11 @@ def camera():
             mascara = cv2.inRange(frameHSV, azulBajo, azulAlto)
             contornos, _ = cv2.findContours(mascara, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
             cv2.drawContours(frame, contornos, -1, (255, 0, 0), 4)
- 
+            
+            
             for c in contornos:
                 area = cv2.contourArea(c)
+                #print("objeto encontrado") 
                 if area > 5000:
                     M = cv2.moments(c)
                     if M["m00"] == 0:
@@ -46,47 +74,35 @@ def camera():
                     cv2.putText(frame, '{},{}'.format(x, y), (x + 10, y), font, 1.2, (0, 0, 255), 2, cv2.LINE_AA)
                     nuevoContorno = cv2.convexHull(c)
                     cv2.drawContours(frame, [nuevoContorno], 0, (255, 0, 0), 3)
- 
-                    if x < 50:
-                        #print("Mover a la izquierda 100%")
-                        ser.write(b"izq1\n")
-                    elif 270 > x >= 50:
-                        #print("Mover a la izquierda 60%")
-                        ser.write(b"izq2\n")
-                    elif 330 > x >= 270:
-                        #print("Mover a la izquierda 30%")
-                        ser.write(b"izq3\n")
-                        # Mover al centro
-                    elif 330 <= x < 390:
-                        #print("Mover al centro")
-                        ser.write(b"ctr\n")
-                    elif 390 <= x < 500:
-                        #print("moviendo a la derecha 30%")
-                        ser.write(b"der3\n")
-                    elif 500 <= x < 570:
-                        #print("moviendo a la derecha 60%")
-                        ser.write(b"der2\n")
-                    elif x >= 570:
-                        #print("Moviendo a la derecha 100%")
-                        ser.write(b"der1\n")
-
-                    if y<84:
-                        ser.write(b"arr1\n")
-                    elif 168> y >=84:
-                        ser.write(b"arr2\n")
-                        #CENTRO EN Y
-                    elif 252> y >=168:
-                        ser.write(b"ctr2\n")
-                    elif 336> y >=252:
-                        ser.write(b"abj2\n")
-                    elif y>=252:
-                        ser.write(b"abj1\n")
-  
+                    #detectando=True
+                    detecto =True
+                    #print("Blue Color")
+                    elapsed = (time.perf_counter() - start)
+                    print(elapsed)
+                    if elapsed >= 5:
+                        print("MOTION")
+                        start = time.perf_counter() #Reincia el cronometro
+                        x = x / 4 # divide en 4 ya que la resolucion es de 640 x 320
+                        #print(x);
+                        cad = str(x) + "," + str("movobj\n") # se guarda en una string el valor de x y el movimiento predeterminado
+                        ser.write(cad.encode('ascii')) #enviar el string al arduino
+                        sleep(10) #duerme 10 segundos :v
+                    #x = x / 180
+                    #print(x)
+                    cad = str(x) +",\n"
+                    #print(cad)
+                    ser.write(cad.encode('ascii'))
+                
+            if detecto == False:
+                print("NO DETECTA NINGUN OBJETO")
+                start = time.perf_counter() #reinicia el contador hasta que encuentre un objeto
+            
             # cv2.imshow('mascaraAzul', mascara)
             cv2.imshow('frame', frame)
             if cv2.waitKey(1) & 0xFF == ord('s'):
                 print('FIN')
                 ser.close()
                 break
+        detecto =False        
     cap.release()
     cv2.destroyAllWindows()

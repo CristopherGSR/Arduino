@@ -9,7 +9,8 @@ from time import sleep
 import imutils
 import time
 from PIL import Image,ImageTk
-from ArduinoPythonIA import camera
+#from ArduinoPythonIA import camera
+from Pruebafinal import camera
 print("Librerias Leidas")
 #Crear la interfaz
 #a=0 
