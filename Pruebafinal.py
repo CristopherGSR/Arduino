@@ -31,12 +31,18 @@ def camera():
     detecto = False
     ser = serial.Serial(COM, BAUD)
  
-    cap = cv2.VideoCapture(0)
+    cap = cv2.VideoCapture(1)
     fps_start_time=0
     fps=0
-   
+    #RANGO DE COLORES 
     azulBajo = np.array([90, 100, 20], np.uint8)
     azulAlto = np.array([120, 255, 255], np.uint8)
+
+    rojoBajo = np.array([136,87,111], np.uint8)
+    rojoAlto = np.array([180,255,255], np.uint8)
+
+    verdeBajo = np.array([25,52,72], np.uint8)
+    verdeAlto = np.array([102,255,255], np.uint8)
     #start = time.perf_counter()
     elapsed = 0
     #detectando= False
@@ -79,17 +85,17 @@ def camera():
                     #print("Blue Color")
                     elapsed = (time.perf_counter() - start)
                     print(elapsed)
-                    if elapsed >= 5:
-                        print("MOTION")
-                        start = time.perf_counter() #Reincia el cronometro
-                        x = x / 4 # divide en 4 ya que la resolucion es de 640 x 320
+                    #if elapsed >= 5:
+                     #   print("MOTION")
+                      #  start = time.perf_counter() #Reincia el cronometro
+                      #  x = x / 4 # divide en 4 ya que la resolucion es de 640 x 320
                         #print(x);
-                        cad = str(x) + "," + str("movobj\n") # se guarda en una string el valor de x y el movimiento predeterminado
-                        ser.write(cad.encode('ascii')) #enviar el string al arduino
-                        sleep(10) #duerme 10 segundos :v
+                      #  cad = str(x) + "," + str("movobj\n") # se guarda en una string el valor de x y el movimiento predeterminado
+                     #   ser.write(cad.encode('ascii')) #enviar el string al arduino
+                     #   sleep(10) #duerme 10 segundos :v
                     #x = x / 180
                     #print(x)
-                    cad = str(x) +",\n"
+                    cad = str(x)+","+str(y)+",\n"
                     #print(cad)
                     ser.write(cad.encode('ascii'))
                 
