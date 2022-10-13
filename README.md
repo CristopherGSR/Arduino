@@ -1,3 +1,3 @@
 # ArduinoGSR
 Deteccion de Objetos
-# GILAZO XDDDDDDDDDDDDDDDDDDDDDDDD
+# GONZALO KBRO :v
