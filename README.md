@@ -1,0 +1,3 @@
+# ArduinoGSR
+Deteccion de Objetos
+# GILAZO XDDDDDDDDDDDDDDDDDDDDDDDD
